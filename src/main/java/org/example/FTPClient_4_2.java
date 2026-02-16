@@ -7,7 +7,7 @@ import org.apache.commons.net.ftp.FTPReply;
 
 import java.io.IOException;
 
-public class FTP_client_4_1 {
+public class FTPClient_4_2 {
     public static void main(String[] args) {
         if (args.length < 1) {
             System.out.println("ERROR: indicar como parámetros:");
@@ -49,9 +49,13 @@ public class FTP_client_4_1 {
                     return;
                 }
             }
+            //clienteFTP.cwd("prueba2");
 
             System.out.printf("INFO: Conexión establecida, mensaje de bienvenida del servidor:\n====\n%s\n====\n", clienteFTP.getReplyString());
             System.out.printf("INFO: Directorio actual en servidor: %s, contenidos:\n", clienteFTP.printWorkingDirectory());
+
+            clienteFTP.mkd("trial/hola");
+
 
             FTPFile[] fichServ = clienteFTP.listFiles();
 
