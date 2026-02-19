@@ -5,7 +5,7 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 
-import java.io.IOException;
+import java.io.*;
 
 public class FTPClient_4_2 {
     public static void main(String[] args) {
@@ -49,13 +49,42 @@ public class FTPClient_4_2 {
                     return;
                 }
             }
-            //clienteFTP.cwd("prueba2");
-
             System.out.printf("INFO: Conexión establecida, mensaje de bienvenida del servidor:\n====\n%s\n====\n", clienteFTP.getReplyString());
+
+            String archivo = "desdeElPrograma.txt";
+
+            clienteFTP.mkd("desdeJava");
+            clienteFTP.cwd("desdeJava");
+
+            String texto = "texto";
+            InputStream inputStream = new ByteArrayInputStream(texto.getBytes());
+            clienteFTP.storeFile(archivo, inputStream);
+            inputStream.close();
+
+            InputStream inputStreamReader = clienteFTP.retrieveFileStream(archivo);
+
+            if (inputStreamReader != null) {
+                BufferedReader bufferedReader = new BufferedReader(
+                        new InputStreamReader(inputStreamReader)
+                );
+
+                String linea;
+                System.out.printf("%nContenido archivo: %s%n", archivo);
+                while((linea = bufferedReader.readLine()) != null) {
+                    System.out.println(linea);
+                }
+
+                bufferedReader.close();
+                inputStreamReader.close();
+            }
+
+            /*
+            Imprescindible para el funcionamiento del cliente FTP porque permite cerrar
+            la conexión de datos creada al usar el comando retrieveFileStream()
+             */
+            clienteFTP.completePendingCommand();
+
             System.out.printf("INFO: Directorio actual en servidor: %s, contenidos:\n", clienteFTP.printWorkingDirectory());
-
-            clienteFTP.mkd("trial/hola");
-
 
             FTPFile[] fichServ = clienteFTP.listFiles();
 
@@ -68,6 +97,23 @@ public class FTPClient_4_2 {
                 }
                 System.out.printf("%s%s\n", f.getName(), infoAdicFich);
             }
+
+            clienteFTP.cwd("/");
+
+            System.out.printf("INFO: Directorio actual en servidor: %s, contenidos:\n", clienteFTP.printWorkingDirectory());
+
+            FTPFile[] fichServ2 = clienteFTP.listFiles();
+
+            for (FTPFile f : fichServ2) {
+                String infoAdicFich = "";
+                if (f.getType() == FTPFile.DIRECTORY_TYPE) {
+                    infoAdicFich = "/";
+                } else if (f.getType() == FTPFile.SYMBOLIC_LINK_TYPE) {
+                    infoAdicFich = " -> " + f.getLink();
+                }
+                System.out.printf("%s%s\n", f.getName(), infoAdicFich);
+            }
+
         } catch (IOException e) {
             System.out.println("ERROR: conectando al servidor");
             e.printStackTrace();
